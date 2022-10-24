@@ -8,6 +8,7 @@
     font-family: sans-serif;
 }
 body{
+    width: 100%;
     height: 100vh;
     display: flex;
     flex-direction: column;
@@ -33,7 +34,7 @@ body.notte{
     font-size: 20px;
 }
 .temperatura{
-    margin: 5px;
+    position: relative;
     height: 30vh;
     width: 50%;
     display: flex;
@@ -69,3 +70,36 @@ body.notte{
     font-size: 20px;
     text-align: center;
 }
+.previsioni{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 80%;
+}
+.previsioni-table{
+    text-align: center;
+    border-spacing: 40px 5px;
+    width: 80%;
+    display: flex;
+    justify-content: center;
+}
+.previsioni-ora td{
+    margin: 5px;
+    font-weight: bold;
+}
+.previsioni-temp td{
+    font-weight: bold;
+    font-size: 30px;
+}
+.previsioni-descr td{
+    max-width: 100px;
+    vertical-align: top;
+    font-weight: bold;
+}
+
+.previsioni-icone-icona{
+    filter: invert(92%);
+    width: 50px;
+    margin: auto;
+}
+

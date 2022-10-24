@@ -6,6 +6,7 @@ window.addEventListener('load',()=>{
     let posizione_regione = document.querySelector('.posizione-regione');
     let icona = document.querySelector('.descrizione-icona');
     let ora = new Date().getHours();
+    let tabella_meteo = document.querySelector('.previsioni-table');
 
     if(ora >18 || ora<7){ // se ora è dopo le 18 o prima delle 7, mette il tema notturno
         let body = document.getElementsByTagName('body')[0];
@@ -15,32 +16,52 @@ window.addEventListener('load',()=>{
         navigator.geolocation.getCurrentPosition(position => {
             coord[0]= position.coords.latitude;
             coord[1]= position.coords.longitude;
-            const city_authkey = '[AUTHKEY]'
             const proxy = 'https://cors-anywhere.herokuapp.com/';
-            const weather_api = `${proxy}https://api.open-meteo.com/v1/forecast?latitude=${coord[0]}&longitude=${coord[1]}&hourly=temperature_2m,apparent_temperature,weathercode&timezone=auto`;
-            const city_api = `${proxy}https://api.bigdatacloud.net/data/reverse-geocode?latitude=${coord[0]}&longitude=${coord[1]}&localityLanguage=it&key=${city_authkey}`;
+            const weather_api = `${proxy}https://api.open-meteo.com/v1/forecast?latitude=${coord[0]}&longitude=${coord[1]}&hourly=temperature_2m,apparent_temperature,weathercode&timezone=auto`; // api per il meteo
+            fetch('settings.json')
+            .then(response => response.json())
+            .then(settings => {
+                const city_api = `${proxy}https://api.bigdatacloud.net/data/reverse-geocode?latitude=${coord[0]}&longitude=${coord[1]}&localityLanguage=it&key=${settings.Oauth}`; // api per reverse geocoding
+                let n_ore_previsioni = settings.n_ore_previsioni;
+                fetch(weather_api)
+                    .then(api_response => {
+                        return api_response.json();
+                    })
+                    .then(api_data => {
+                        timeIndex = api_data.hourly.time.indexOf(getDate()); // indice degli array corrispondente all'ora corrente
+                        weathercode = api_data.hourly.weathercode[timeIndex]; // codice per definire il tempo 
+                        gradi.textContent = api_data.hourly.temperature_2m[timeIndex]; // imposta i gradi
+                        descrizione.textContent = getWeatherDescr(weathercode); // imposta la descrizione
+                        icona.setAttribute("src",`icone/${getIcon(weathercode)}.png`); // imposta l'icona
+                        console.log('Codice meteo: '+weathercode);
 
-            fetch(weather_api)
-                .then(api_response => {
-                    return api_response.json();
-                })
-                .then(api_data => {
-                    timeIndex = api_data.hourly.time.indexOf(getDate()); // indice degli array corrispondente all'ora corrente
-                    weathercode = api_data.hourly.weathercode[timeIndex]; // codice per definire il tempo 
-                    gradi.textContent = api_data.hourly.temperature_2m[timeIndex]; // imposta i gradi
-                    descrizione.textContent = getWeatherDescr(weathercode); // imposta la descrizione
-                    icona.setAttribute("src",`icone/${getIcon(weathercode)}.png`); // imposta l'icona
-                    console.log('Codice meteo: '+weathercode);
-                });
-            fetch(city_api)
-                .then(api_response => {
-                    return api_response.json();
-                })
-                .then(api_data => {
-                    posizione_luogo.textContent = api_data.city; // imposta il nome della città
-                    posizione_regione.textContent = api_data.principalSubdivision; // imposta il nome della regione
-                })
-        })
+                        for(let i=1;i<=n_ore_previsioni;i++){ // imposta i campi della tabella delle previsioni
+                            let cella_ora = tabella_meteo.rows[0].insertCell(-1); // riga delle ore
+                            cella_ora.innerHTML = api_data.hourly.time[timeIndex+i].slice(-5);
+
+                            let cella_temp = tabella_meteo.rows[1].insertCell(-1); // riga temperature
+                            cella_temp.innerHTML = api_data.hourly.temperature_2m[timeIndex+i]+'°C';
+
+                            let cella_descr = tabella_meteo.rows[3].insertCell(-1); // riga descrizioni
+                            cella_descr.innerHTML = getWeatherDescr(api_data.hourly.weathercode[timeIndex+i]);
+
+                            let img = document.createElement("img");
+                            let icona = getIcon(api_data.hourly.weathercode[timeIndex+i]);
+                            img.setAttribute('src',`icone/${icona}.png`)
+                            img.setAttribute('class','previsioni-icone-icona')
+                            tabella_meteo.rows[2].insertCell(-1).append(img); // riga icone
+                        }
+                    });
+                fetch(city_api)
+                    .then(api_response => {
+                        return api_response.json();
+                    })
+                    .then(api_data => {
+                        posizione_luogo.textContent = api_data.city; // imposta il nome della città
+                        posizione_regione.textContent = api_data.principalSubdivision; // imposta il nome della regione
+                    });
+            });
+        });
     }
     else{
         console.log('¯\_(ツ)_/¯');
@@ -48,14 +69,14 @@ window.addEventListener('load',()=>{
     
 });
 
-function getDate(){
+function getDate(){ // ritorna la data attuale in formato ISO 8601
     let d = new Date();
     function z(n){return (n<10?'0':'') + n}
     return d.getFullYear() + '-' + z(d.getMonth()+1) + '-' +
         z(d.getDate()) + 'T' + z(d.getHours()) + ':00'
 }
 
-function getWeatherDescr(codice){
+function getWeatherDescr(codice){ // ritorna la descrizione in base all'indice passato
     const descrizioni = {
         0:'Soleggiato',
         1:'Perlopiù soleggiato',
@@ -77,10 +98,10 @@ function getWeatherDescr(codice){
         73:'Neve',
         75:'Neve forte',
         77:'Nevischio',
-        80:'',
-        81:'',
-        82:'',
-        85:'',
+        80:'Temporali',
+        81:'Temporali',
+        82:'Temporali',
+        85:'Temporali',
         86:'Temporali',
         95:'Temporali',
         96:'Temporali con neve a tratti',
@@ -89,7 +110,7 @@ function getWeatherDescr(codice){
     return descrizioni[codice];
 }
 
-function getIcon(codice){
+function getIcon(codice){ // ritorna l'icona in base all'indice passato
     const icone = {
         0:'soleggiato',
         1:'soleggiato',
@@ -111,9 +132,9 @@ function getIcon(codice){
         73:'neve1',
         75:'neve2',
         77:'neve1',
-        80:'temporale',
-        81:'temporale',
-        82:'temporale',
+        80:'pioggia3',
+        81:'pioggia3',
+        82:'pioggia3',
         85:'temporale',
         86:'temporale',
         95:'temporale',
@@ -122,5 +143,3 @@ function getIcon(codice){
     }
     return icone[codice];
 }
-
-

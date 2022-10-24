@@ -2,30 +2,35 @@
 <html>
     <head>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <meta name="viewport" content="width=device-width, initial-scale=0.9"/>
         <title>Meteo</title>
         <link rel="stylesheet" href="./stile.css" />
         <link rel="icon" class="favicon" type="image/x-icon" href="./icone/favicon.png" >
+        <script type="text/javascript" src="settings.json"></script>
+        <script type="text/javascript" src="main.js"></script>
     </head>
     <body class="giorno">
-        <script src="main.js"></script>
-
         <div class="posizione">
-            <h1 class="posizione-luogo">Cremona</h1>
+            <h1 class="posizione-luogo"></h1>
             <p class="posizione-regione"></p>
-            
         </div>
         <div class="temperatura">
             <div class="temperatura-gradi">
-                <h1 class="gradi-numero">20</h1>
+                <h1 class="gradi-numero"></h1>
                 <span class="gradi-c">°C</span>
             </div>
             <div class="temperatura-descrizione">
                 <img class="descrizione-icona" src="icone/soleggiato.png" alt="icona">
-                <p class="descrizione-meteo">
-                    -
-                </p>
+                <p class="descrizione-meteo"></p>
             </div>
+        </div>
+        <div class="previsioni">
+            <table class="previsioni-table">
+                <tr class="previsioni-ora"></tr>
+                <tr class="previsioni-temp"></tr>
+                <tr class="previsioni-icone"></tr>
+                <tr class="previsioni-descr"></tr>
+            </table>
         </div>
     </body>
 
