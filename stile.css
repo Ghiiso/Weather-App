@@ -1,0 +1,71 @@
+:root{
+    --text_color: #eff5f8;
+}
+
+*{
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+}
+body{
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: var(--text_color);
+}
+body.giorno{
+    background: linear-gradient(#014b6d,#58c8fc);
+}
+body.notte{
+    background: linear-gradient(#00151f,#005f8b);
+}
+.posizione{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.posizione-luogo{
+    font-size: 50px;
+}
+.posizione-regione{
+    font-size: 20px;
+}
+.temperatura{
+    margin: 5px;
+    height: 30vh;
+    width: 50%;
+    display: flex;
+    justify-content:center;
+    align-items: center;
+}
+
+.temperatura-gradi{
+    display: flex;
+}
+.gradi-numero{
+    margin: 5px;
+    font-size:100px;
+}
+.gradi-c{
+    margin: 5px;
+    font-size: 30px;
+    font-weight: bold;
+}
+.temperatura-descrizione{
+    margin: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.descrizione-icona{
+    width:90px;
+    filter: invert(92%);
+}
+.descrizione-meteo{
+    max-width: 150px;
+    font-weight: bold;
+    font-size: 20px;
+    text-align: center;
+}
