@@ -62,7 +62,6 @@ body.notte{
 }
 .temperatura-descrizione i{
     margin: 15px;
-    transform: rotate(20deg);
 }
 .fa-sun{
     transform: rotate(20deg);
