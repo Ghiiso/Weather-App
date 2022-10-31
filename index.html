@@ -5,9 +5,10 @@
         <meta name="viewport" content="width=device-width, initial-scale=0.9"/>
         <title>Meteo</title>
         <link rel="stylesheet" href="./stile.css" />
-        <link rel="icon" class="favicon" type="image/x-icon" href="./icone/favicon.png" >
+        <link rel="icon" class="favicon" type="image/x-icon" href="./icone/favicon.png">
         <script type="text/javascript" src="settings.json"></script>
         <script type="text/javascript" src="main.js"></script>
+        <script src="https://kit.fontawesome.com/13a1ff7c16.js" crossorigin="anonymous"></script>
     </head>
     <body class="giorno">
         <div class="posizione">
@@ -20,16 +21,28 @@
                 <span class="gradi-c">°C</span>
             </div>
             <div class="temperatura-descrizione">
-                <img class="descrizione-icona" src="icone/soleggiato.png" alt="icona">
+                <i class="icona"></i>
                 <p class="descrizione-meteo"></p>
             </div>
         </div>
-        <div class="previsioni">
+        <!--Menu previsioni-->
+        <div class="bottoni">
+            <button class="tabbutt" id="defaultbutt" onclick="cambiaScheda(event,'previsioni-stessagiornata')">Oggi</button>
+            <button class="tabbutt" onclick="cambiaScheda(event,'previsioni-giornisuccessivi')">Prossimi giorni</button>
+        </div>
+        <div class="previsioni" id="previsioni-stessagiornata">
             <table class="previsioni-table">
                 <tr class="previsioni-ora"></tr>
                 <tr class="previsioni-temp"></tr>
                 <tr class="previsioni-icone"></tr>
                 <tr class="previsioni-descr"></tr>
+            </table>
+        </div>
+        <div class="previsioni" id="previsioni-giornisuccessivi">
+            <table class="previsioni-table">
+                <tr class="previsioni-giorni"></tr>
+                <tr class="previsioni-icone"></tr>
+                <tr class="previsioni-temperature"></tr>
             </table>
         </div>
     </body>

@@ -60,6 +60,13 @@ body.notte{
     flex-direction: column;
     align-items: center;
 }
+.temperatura-descrizione i{
+    margin: 15px;
+    transform: rotate(20deg);
+}
+.fa-sun{
+    transform: rotate(20deg);
+}
 .descrizione-icona{
     width:90px;
     filter: invert(92%);
@@ -70,6 +77,32 @@ body.notte{
     font-size: 20px;
     text-align: center;
 }
+
+.bottoni{
+    width: 65%;
+}
+
+.bottoni button{
+    color: inherit;
+    font-weight: bold;
+    font-size: 20px;
+    background-color: inherit;
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding:16px;
+    transition: 0.3s;
+}
+
+.bottoni button:hover{
+    background-color: #005f8b62;
+}
+
+.bottoni button.active{
+    background-color: #005f8b5b;
+}
+
 .previsioni{
     display: flex;
     align-items: center;
@@ -77,13 +110,16 @@ body.notte{
     width: 80%;
 }
 .previsioni-table{
+    margin: 10px;
     text-align: center;
     border-spacing: 40px 5px;
     width: 80%;
     display: flex;
     justify-content: center;
+    border-top: 1px solid var(--text_color);
 }
 .previsioni-ora td{
+    padding-top: 10px;
     margin: 5px;
     font-weight: bold;
 }
@@ -92,14 +128,28 @@ body.notte{
     font-size: 30px;
 }
 .previsioni-descr td{
+    padding-top: 10px;
     max-width: 100px;
     vertical-align: top;
     font-weight: bold;
 }
 
-.previsioni-icone-icona{
-    filter: invert(92%);
-    width: 50px;
-    margin: auto;
+.previsioni-giorni td{
+    padding-top: 10px;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.previsioni-icone td i{
+    margin: 7px;
+}
+.previsioni-temperature td span:first-child{
+    font-weight:bold;
+}
+.previsioni-temperature td span{
+    margin: 5px;
+    display:inline;
+    font-weight: 500;
+    font-size: 17px;
 }
 
