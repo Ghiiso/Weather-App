@@ -1,87 +1,34 @@
+const settimana = ['Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato','Domenica']
+const cities_api = `https://raw.githubusercontent.com/lutangar/cities.json/master/cities.json`;
+var coord = [];
+var ora = new Date().getHours();
+
 window.addEventListener('load',()=>{
-    const settimana = ['Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato','Domenica']
-    let coord = [];
-    let gradi = document.querySelector('.gradi-numero');
-    let descrizione = document.querySelector('.descrizione-meteo');
-    let posizione_luogo = document.querySelector('.posizione-luogo');
-    let posizione_regione = document.querySelector('.posizione-regione');
-    let icona = document.querySelector('.icona');
-    let ora = new Date().getHours();
-    let tabella_meteo = document.getElementsByClassName('previsioni-table');
+
     document.getElementById("defaultbutt").click(); // clicca il bottone con scheda default
 
     if(ora >18 || ora<7){ // se ora è dopo le 18 o prima delle 7, mette il tema notturno
         let body = document.getElementsByTagName('body')[0];
         body.className = 'notte';
     }
+
     if(navigator.geolocation){
         navigator.geolocation.getCurrentPosition(position => {
             coord[0]= position.coords.latitude;
             coord[1]= position.coords.longitude;
-            const proxy = 'https://cors-anywhere.herokuapp.com/';
-            const weather_api = `${proxy}https://api.open-meteo.com/v1/forecast?latitude=${coord[0]}&longitude=${coord[1]}&hourly=temperature_2m,apparent_temperature,weathercode&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto`; // api per il meteo
-            fetch('settings.json')
+
+            fetch('settings.json') // FETCH json
             .then(response => response.json())
             .then(settings => {
-                const city_api = `${proxy}https://api.bigdatacloud.net/data/reverse-geocode?latitude=${coord[0]}&longitude=${coord[1]}&localityLanguage=it&key=${settings.Oauth}`; // api per reverse geocoding
-                let n_ore_previsioni = settings.n_ore_previsioni;
-                let n_giorni_previsioni = settings.n_giorni_previsioni;
-                fetch(weather_api)
-                    .then(api_response => {
-                        return api_response.json();
-                    })
-                    .then(api_data => {
-                        timeIndex = api_data.hourly.time.indexOf(getDate()); // indice degli array corrispondente all'ora corrente
-                        weathercode = api_data.hourly.weathercode[timeIndex]; // codice per definire il tempo 
-                        gradi.textContent = api_data.hourly.temperature_2m[timeIndex]; // imposta i gradi
-                        descrizione.textContent = getWeatherDescr(weathercode); // imposta la descrizione
-                        icona.className = 'fas fa-'+getIcon(weathercode)+' fa-5x fa-fw'; // imposta l'icona
-                        console.log('Coordinate:'+coord+'\nCodice meteo: '+weathercode);
-                        console.log(api_data)
-                        let oggi = new Date().getDay()
-                        for(let i=1;i<=n_ore_previsioni;i++){ // imposta i campi della tabella delle previsioni
-                            let cella_ora = tabella_meteo[0].rows[0].insertCell(-1); // riga delle ore
-                            cella_ora.innerHTML = api_data.hourly.time[timeIndex+i].slice(-5);
-
-                            let cella_temp = tabella_meteo[0].rows[1].insertCell(-1); // riga temperature
-                            cella_temp.innerHTML = api_data.hourly.temperature_2m[timeIndex+i]+'°C';
-
-                            let cella_descr = tabella_meteo[0].rows[3].insertCell(-1); // riga descrizioni
-                            cella_descr.innerHTML = getWeatherDescr(api_data.hourly.weathercode[timeIndex+i]);
-
-                            let img = document.createElement("i");
-                            img.className = 'fas fa-'+getIcon(api_data.hourly.weathercode[timeIndex+i])+' fa-2x';
-                            tabella_meteo[0].rows[2].insertCell(-1).append(img); // riga icone
-                        }
-
-                        for(let i=1;i<=n_giorni_previsioni;i++){ // imposta i campi della tabella delle previsioni dei giorni successivi
-                            cella_giorno = tabella_meteo[1].rows[0].insertCell(-1); // riga giorni della settimana
-                            if(i==1) cella_giorno.innerHTML = 'Domani'
-                            else if(i==2) cella_giorno.innerHTML = 'Dopodomani'
-                            else cella_giorno.innerHTML = settimana[index(oggi+i-1)];
-
-                            img = document.createElement("i"); // riga icone
-                            img.className = 'fas fa-'+getIcon(api_data.daily.weathercode[i])+' fa-2x';
-                            tabella_meteo[1].rows[1].insertCell(-1).append(img);
-                            
-                            temp = tabella_meteo[1].rows[2].insertCell(-1);
-                            span = document.createElement('span') // riga temperature
-                            span.innerHTML = api_data.daily.temperature_2m_max[i]+'°C';
-                            temp.append(span)
-                            span = document.createElement('span')
-                            span.innerHTML = api_data.daily.temperature_2m_min[i]+'°C';
-                            temp.append(span)
-                        }
-                    });
-                fetch(city_api)
-                    .then(api_response => {
-                        return api_response.json();
-                    })
-                    .then(api_data => {
-                        posizione_luogo.textContent = api_data.city; // imposta il nome della città
-                        posizione_regione.textContent = api_data.principalSubdivision; // imposta il nome della regione
-                    });
+            initTab(settings); // inizializza la tabella
             });
+            callWeatherApi(coord);
+            callCityApi(coord);
+        });
+        document.getElementById('citybar').addEventListener("keypress", function(event){ // chiama la funzione cerca se viene premuto invio
+            if (event.key == 'Enter'){
+                cerca()
+            }
         });
     }
     else{
@@ -89,6 +36,134 @@ window.addEventListener('load',()=>{
     }
     
 });
+
+
+function callWeatherApi(coord){
+    fetch('settings.json') // FETCH json
+    .then(response => response.json())
+    .then(settings => {
+        const proxy = settings.proxy;
+        var weather_api = getWeatherApi(proxy,coord); // api per il meteo
+        
+        fetch(weather_api) // FETCH meteo
+            .then(api_response => {
+                return api_response.json();
+            })
+            .then(api_data => {
+                aggiornaTab(api_data,settings);
+            });
+    });
+}
+
+function callCityApi(coord){
+    fetch('settings.json') // FETCH json
+    .then(response => response.json())
+    .then(settings => {
+        const proxy = settings.proxy;
+        var city_api = getCityApi(proxy,coord,settings); // api per reverse geocoding
+
+        fetch(city_api) // FETCH reverse geocoding
+            .then(api_response => {
+                return api_response.json();
+            })
+            .then(api_data => {
+                var posizione_luogo = document.querySelector('.posizione-luogo');
+                var posizione_regione = document.querySelector('.posizione-regione');
+                posizione_luogo.textContent = api_data.city; // imposta il nome della città
+                posizione_regione.textContent = api_data.principalSubdivision; // imposta il nome della regione
+            });
+    });
+}
+
+function callAllCitiesApi(city,url){
+    fetch(url)
+        .then(api_response => {
+            return api_response.json();
+        })
+        .then(api_data => {
+            var newcity = api_data.find(el => el.name.toLowerCase()==city.toLowerCase())
+            coord = []
+            coord[0] = newcity.lat;
+            coord[1] = newcity.lng;
+
+            callWeatherApi(coord);
+            callCityApi(coord);
+        });
+}
+
+function cerca(){ // cerca la città quando viene premuto il bottone di searchbar o quando viene premuto invio
+    let input = document.getElementById('citybar');
+    callAllCitiesApi(input.value,cities_api);
+    input.value='';
+}
+
+function initTab(settings){ // inizializza le tabelle del menu
+    var tabella_meteo = document.getElementsByClassName('previsioni-table');
+    for (let i = 0; i < 4; i++) {
+        for (let j = 0; j < settings.n_ore_previsioni; j++) {
+            temp = tabella_meteo[0].rows[i].insertCell();
+            if(i==2){
+                temp.append(document.createElement("i"));
+            }
+        }
+        for (let j = 0; j < settings.n_giorni_previsioni; j++) {
+            if(i<3) temp = tabella_meteo[1].rows[i].insertCell();
+            if(i==1) temp.append(document.createElement("i"));
+            if(i==2){
+                span = document.createElement('span') // riga temperature
+                temp.append(span)
+                span = document.createElement('span')
+                temp.append(span)
+            }
+        }
+    }
+}
+
+
+
+function aggiornaTab(api_data,settings){
+    var gradi = document.querySelector('.gradi-numero');
+    var descrizione = document.querySelector('.descrizione-meteo');
+    var icona = document.getElementById('icona');
+    var tabella_meteo = document.getElementsByClassName('previsioni-table');
+
+    timeIndex = api_data.hourly.time.indexOf(getDate()); // indice degli array corrispondente all'ora corrente
+    weathercode = api_data.hourly.weathercode[timeIndex]; // codice per definire il tempo 
+    gradi.textContent = api_data.hourly.temperature_2m[timeIndex]; // imposta i gradi
+    descrizione.textContent = getWeatherDescr(weathercode); // imposta la descrizione
+    icona.className = 'fas fa-'+getIcon(weathercode)+' fa-5x fa-fw'; // imposta l'icona
+    console.log('Coordinate:'+coord+'\nCodice meteo: '+weathercode);
+
+    let oggi = new Date().getDay()
+    for(let i=1;i<=settings.n_ore_previsioni;i++){ // imposta i campi della tabella delle previsioni
+        let cella_ora = tabella_meteo[0].rows[0].cells[i-1]; // riga delle ore
+        cella_ora.innerHTML = api_data.hourly.time[timeIndex+i].slice(-5);
+
+        let cella_temp = tabella_meteo[0].rows[1].cells[i-1]; // riga temperature
+        cella_temp.innerHTML = api_data.hourly.temperature_2m[timeIndex+i]+'°C';
+
+        let cella_descr = tabella_meteo[0].rows[3].cells[i-1]; // riga descrizioni
+        cella_descr.innerHTML = getWeatherDescr(api_data.hourly.weathercode[timeIndex+i]);
+
+        tabella_meteo[0].rows[2].cells[i-1].firstChild.className = 'fas fa-'+getIcon(api_data.hourly.weathercode[timeIndex+i])+' fa-2x'; // riga icone
+    }
+
+    for(let i=1;i<=settings.n_giorni_previsioni;i++){ // imposta i campi della tabella delle previsioni dei giorni successivi
+        cella_giorno = tabella_meteo[1].rows[0].cells[i-1]; // riga giorni della settimana
+        if(i==1) cella_giorno.innerHTML = 'Domani'
+        else if(i==2) cella_giorno.innerHTML = 'Dopodomani'
+        else cella_giorno.innerHTML = settimana[index(oggi+i-1)];
+
+        tabella_meteo[1].rows[1].cells[i-1].firstChild.className = 'fas fa-'+getIcon(api_data.daily.weathercode[i])+' fa-2x';
+        
+        temp = tabella_meteo[1].rows[2].cells[i-1].children;
+        span = temp[0] // riga temperature
+        span.innerHTML = api_data.daily.temperature_2m_max[i]+'°C';
+        span = temp[1];
+        span.innerHTML = api_data.daily.temperature_2m_min[i]+'°C';
+    }
+}
+
 
 function getDate(){ // ritorna la data attuale in formato ISO 8601
     let d = new Date();
@@ -178,6 +253,13 @@ function getIcon(codice){ // ritorna l'icona in base all'indice passato
         99:'cloud-bolt'
     }
     return icone[codice];
+}
+
+function getWeatherApi(proxy,coord){
+    return `${proxy}https://api.open-meteo.com/v1/forecast?latitude=${coord[0]}&longitude=${coord[1]}&hourly=temperature_2m,apparent_temperature,weathercode&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto`;
+}
+function getCityApi(proxy,coord,settings){
+    return `${proxy}https://api.bigdatacloud.net/data/reverse-geocode?latitude=${coord[0]}&longitude=${coord[1]}&localityLanguage=it&key=${settings.Oauth}`;
 }
 
 function index(i){

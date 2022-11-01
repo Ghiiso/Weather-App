@@ -9,8 +9,15 @@
         <script type="text/javascript" src="settings.json"></script>
         <script type="text/javascript" src="main.js"></script>
         <script src="https://kit.fontawesome.com/13a1ff7c16.js" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     </head>
     <body class="giorno">
+        <!--barra di ricerca-->
+        <div class="searchbar">
+            <input type="text" placeholder="Cerca una città" id="citybar">
+            <button class="searchbutt" onclick="cerca(event)"><i class="fas fa-search fa-2x" aria-hidden="true"></i></button>
+        </div>
+        <!--città-->
         <div class="posizione">
             <h1 class="posizione-luogo"></h1>
             <p class="posizione-regione"></p>
@@ -21,7 +28,7 @@
                 <span class="gradi-c">°C</span>
             </div>
             <div class="temperatura-descrizione">
-                <i class="icona"></i>
+                <i id="icona"></i>
                 <p class="descrizione-meteo"></p>
             </div>
         </div>
@@ -30,6 +37,7 @@
             <button class="tabbutt" id="defaultbutt" onclick="cambiaScheda(event,'previsioni-stessagiornata')">Oggi</button>
             <button class="tabbutt" onclick="cambiaScheda(event,'previsioni-giornisuccessivi')">Prossimi giorni</button>
         </div>
+        <!--tab 1-->
         <div class="previsioni" id="previsioni-stessagiornata">
             <table class="previsioni-table">
                 <tr class="previsioni-ora"></tr>
@@ -38,6 +46,7 @@
                 <tr class="previsioni-descr"></tr>
             </table>
         </div>
+        <!--tab 2-->
         <div class="previsioni" id="previsioni-giornisuccessivi">
             <table class="previsioni-table">
                 <tr class="previsioni-giorni"></tr>
