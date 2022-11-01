@@ -1,5 +1,6 @@
 {
-    "Oauth":"bdc_81bb6d5fb72640f09f84a950adcd5056",
+    "Oauth":"",
     "n_ore_previsioni":"8",
-    "n_giorni_previsioni":"6"
+    "n_giorni_previsioni":"6",
+    "proxy":"https://cors-anywhere.herokuapp.com/"
 }
