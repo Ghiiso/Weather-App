@@ -24,12 +24,10 @@ body.notte{
 }
 
 .searchbar{
-    margin: 0 0 30px 0;
-    background-color: #014b6d;
-    border-radius: 7px;
+    margin: 0 0 50px 0;
 }
 input{
-    width: 20vw;
+    width: 15vw;
     padding: 10px;
     border: none;
     box-sizing: border-box;
@@ -39,6 +37,9 @@ input{
     font-size: 15px;
     cursor:text;
     transition: 0.3s;
+    background-color: #014b6d;
+    border-radius: 7px;
+    border-radius: 7px 0 0 7px;
     outline: none;
 }
 input::placeholder{
@@ -47,21 +48,23 @@ input::placeholder{
     font-weight: 300;
 }
 input:focus{
-    background-color: #005f8bb7;
+    background-color: #014b6d65;
     border: solid none;
     border-radius: 7px 0 0 7px;
 }
 
 .searchbutt{
-    margin: 5px;
+    background-color: #014b6d;
+    padding: 5px;
     float: right;
-    background: none;
     border: none;
     color: var(--text_color);
+    border-radius: 0 7px 7px 0;
     cursor: pointer;
 }
 
 .posizione{
+    margin-top: 50px;
     display: flex;
     flex-direction: column;
     align-items: center;

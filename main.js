@@ -1,5 +1,6 @@
 const settimana = ['Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato','Domenica']
 const cities_api = `https://raw.githubusercontent.com/lutangar/cities.json/master/cities.json`;
+const ita_cities_api = 'https://raw.githubusercontent.com/MatteoHenryChinaski/Comuni-Italiani-2018-Sql-Json-excel/master/italy_geo.json'
 var coord = [];
 var ora = new Date().getHours();
 
@@ -12,7 +13,7 @@ window.addEventListener('load',()=>{
         body.className = 'notte';
     }
 
-    fetch('settings.json') // FETCH json
+    fetch('settings.json') // FETCH settings
             .then(response => response.json())
             .then(settings => {
             initTab(settings); // inizializza la tabella
@@ -24,7 +25,7 @@ window.addEventListener('load',()=>{
             coord[1]= position.coords.longitude;
 
             callWeatherApi(coord);
-            callCityApi(coord);
+            callCityApi(coord,'');
         });
 
         document.getElementById('citybar').addEventListener("keypress", function(event){ // chiama la funzione cerca se viene premuto invio
@@ -57,7 +58,7 @@ function callWeatherApi(coord){
     });
 }
 
-function callCityApi(coord){
+function callCityApi(coord,city_bak){
     // aggiorna il nome in base alle coordinate passate
     fetch('settings.json') // FETCH json
     .then(response => response.json())
@@ -70,29 +71,46 @@ function callCityApi(coord){
                 return api_response.json();
             })
             .then(api_data => {
-                var posizione_luogo = document.querySelector('.posizione-luogo');
-                var posizione_regione = document.querySelector('.posizione-regione');
-                posizione_luogo.textContent = api_data.city; // imposta il nome della città
-                posizione_regione.textContent = api_data.principalSubdivision; // imposta il nome della regione
-            });
+                if(api_data.ok){
+                cambiaIntestazione(api_data.city,api_data.principalSubdivision);
+                }
+                else{
+                    cambiaIntestazione(city_bak,'')
+                }
+            })
     });
 }
 
-function callAllCitiesApi(city,url){
+function callAllCitiesApi(city,ita_url,world_url){ // ew
     // ottiene le coordinate di city e aggiorna il meteo e il nome
-    fetch(url)
+    var coord = []
+    var name;
+    fetch(ita_url)
         .then(api_response => {
             return api_response.json();
         })
         .then(api_data => {
-            var newcity = api_data.find(el => el.name.toLowerCase()==city.toLowerCase()) 
-            // restituisce l'oggetto nella lista delle città con il nome uguale a quello passato
-            coord = []
-            coord[0] = newcity.lat;
-            coord[1] = newcity.lng;
+            try{ // se la città è italiana
+                var newcity = api_data.find(el => el.comune.toLowerCase()==city.toLowerCase()) // restituisce l'oggetto nella lista delle città italiane con il nome uguale a quello passato
+                coord[0] = newcity.lat;
+                coord[1] = newcity.lng;
+                name = newcity.comune
+            }
+            catch{ // se la città non è italiana
+                fetch(world_url)
+                .then(api_response => {
+                    return api_response.json()
+                })
+                .then(api_data => {
+                    var newcity = api_data.find(el => el.name.toLowerCase()==city.toLowerCase())
+                    name = newcity.name
+                    coord[0] = newcity.lat;
+                    coord[1] = newcity.lng;
+                })
+            }
 
             callWeatherApi(coord); // aggiorna il meteo
-            callCityApi(coord); // aggiorna il nome della città
+            callCityApi(coord,name); // aggiorna il nome della città
         });
 }
 
@@ -101,10 +119,17 @@ function cerca(){
     let input = document.getElementById('citybar');
     
     if(input.value.length>0){
-        callAllCitiesApi(input.value,cities_api);
+        callAllCitiesApi(input.value,ita_cities_api,cities_api);
         input.value=''; // svuota la barra di ricerca
     }
 
+}
+
+function cambiaIntestazione(luogo,regione){
+    var posizione_luogo = document.querySelector('.posizione-luogo');
+    var posizione_regione = document.querySelector('.posizione-regione');
+    posizione_luogo.textContent = luogo; // imposta il nome della città
+    posizione_regione.textContent = regione; // imposta il nome della regione
 }
 
 function initTab(settings){
