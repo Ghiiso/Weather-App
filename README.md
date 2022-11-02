@@ -1,5 +1,5 @@
 # Weather App
-Pagina web per visualizzare il meteo e le previsioni metereologiche relative alla propria posizione.
+Pagina web per visualizzare il meteo e le previsioni metereologiche relative alla propria posizione o ad una qualsiasi città (la ricerca della città è ancora molto imprecisa).
 
 ## Requisiti
 1. avere un live server o un localhost
