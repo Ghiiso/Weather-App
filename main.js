@@ -12,19 +12,21 @@ window.addEventListener('load',()=>{
         body.className = 'notte';
     }
 
-    if(navigator.geolocation){
-        navigator.geolocation.getCurrentPosition(position => {
-            coord[0]= position.coords.latitude;
-            coord[1]= position.coords.longitude;
-
-            fetch('settings.json') // FETCH json
+    fetch('settings.json') // FETCH json
             .then(response => response.json())
             .then(settings => {
             initTab(settings); // inizializza la tabella
             });
+
+    if(navigator.geolocation){ // inizializzazione con coordinate della posizione attuale
+        navigator.geolocation.getCurrentPosition(position => {
+            coord[0]= position.coords.latitude;
+            coord[1]= position.coords.longitude;
+
             callWeatherApi(coord);
             callCityApi(coord);
         });
+
         document.getElementById('citybar').addEventListener("keypress", function(event){ // chiama la funzione cerca se viene premuto invio
             if (event.key == 'Enter'){
                 cerca()
@@ -37,8 +39,8 @@ window.addEventListener('load',()=>{
     
 });
 
-
 function callWeatherApi(coord){
+    // aggiorna la tabella con i dati relativi alle coordinate passate
     fetch('settings.json') // FETCH json
     .then(response => response.json())
     .then(settings => {
@@ -56,6 +58,7 @@ function callWeatherApi(coord){
 }
 
 function callCityApi(coord){
+    // aggiorna il nome in base alle coordinate passate
     fetch('settings.json') // FETCH json
     .then(response => response.json())
     .then(settings => {
@@ -76,28 +79,36 @@ function callCityApi(coord){
 }
 
 function callAllCitiesApi(city,url){
+    // ottiene le coordinate di city e aggiorna il meteo e il nome
     fetch(url)
         .then(api_response => {
             return api_response.json();
         })
         .then(api_data => {
-            var newcity = api_data.find(el => el.name.toLowerCase()==city.toLowerCase())
+            var newcity = api_data.find(el => el.name.toLowerCase()==city.toLowerCase()) 
+            // restituisce l'oggetto nella lista delle città con il nome uguale a quello passato
             coord = []
             coord[0] = newcity.lat;
             coord[1] = newcity.lng;
 
-            callWeatherApi(coord);
-            callCityApi(coord);
+            callWeatherApi(coord); // aggiorna il meteo
+            callCityApi(coord); // aggiorna il nome della città
         });
 }
 
-function cerca(){ // cerca la città quando viene premuto il bottone di searchbar o quando viene premuto invio
+function cerca(){
+    // chiamata quando viene premuto il bottone di searchbar o quando viene premuto invio
     let input = document.getElementById('citybar');
-    callAllCitiesApi(input.value,cities_api);
-    input.value='';
+    
+    if(input.value.length>0){
+        callAllCitiesApi(input.value,cities_api);
+        input.value=''; // svuota la barra di ricerca
+    }
+
 }
 
-function initTab(settings){ // inizializza le tabelle del menu
+function initTab(settings){
+    // inizializza le tabelle del menu
     var tabella_meteo = document.getElementsByClassName('previsioni-table');
     for (let i = 0; i < 4; i++) {
         for (let j = 0; j < settings.n_ore_previsioni; j++) {
@@ -119,9 +130,8 @@ function initTab(settings){ // inizializza le tabelle del menu
     }
 }
 
-
-
 function aggiornaTab(api_data,settings){
+    // aggiorna le tabelle con i dati passati
     var gradi = document.querySelector('.gradi-numero');
     var descrizione = document.querySelector('.descrizione-meteo');
     var icona = document.getElementById('icona');
@@ -165,7 +175,8 @@ function aggiornaTab(api_data,settings){
 }
 
 
-function getDate(){ // ritorna la data attuale in formato ISO 8601
+function getDate(){
+    // ritorna la data attuale in formato ISO 8601
     let d = new Date();
     function z(n){return (n<10?'0':'') + n}
     return d.getFullYear() + '-' + z(d.getMonth()+1) + '-' +
@@ -173,6 +184,7 @@ function getDate(){ // ritorna la data attuale in formato ISO 8601
 }
 
 function cambiaScheda(evt,nomeTab) {
+    // nasconde tutti i tab e mostra solo nomeTab
     let tabprevisioni = document.getElementsByClassName("previsioni"); // nasconde tutti i tab
     Array.from(tabprevisioni).forEach((tab) => {
         tab.style.display = "none";
@@ -187,7 +199,8 @@ function cambiaScheda(evt,nomeTab) {
     evt.currentTarget.className += " active"; // aggiunge la classe active al bottone premuto
 }
 
-function getWeatherDescr(codice){ // ritorna la descrizione in base all'indice passato
+function getWeatherDescr(codice){
+    // ritorna la descrizione in base all'indice passato
     const descrizioni = {
         0:'Soleggiato',
         1:'Perlopiù soleggiato',
@@ -221,7 +234,8 @@ function getWeatherDescr(codice){ // ritorna la descrizione in base all'indice p
     return descrizioni[codice];
 }
 
-function getIcon(codice){ // ritorna l'icona in base all'indice passato
+function getIcon(codice){
+    // ritorna l'icona in base all'indice passato
     const icone = {
         0:'sun',
         1:'sun',
@@ -256,9 +270,11 @@ function getIcon(codice){ // ritorna l'icona in base all'indice passato
 }
 
 function getWeatherApi(proxy,coord){
+    // ritorna la stringa dell'indirizzo web formattata
     return `${proxy}https://api.open-meteo.com/v1/forecast?latitude=${coord[0]}&longitude=${coord[1]}&hourly=temperature_2m,apparent_temperature,weathercode&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto`;
 }
 function getCityApi(proxy,coord,settings){
+    // ritorna la stringa dell'indirizzo web formattata
     return `${proxy}https://api.bigdatacloud.net/data/reverse-geocode?latitude=${coord[0]}&longitude=${coord[1]}&localityLanguage=it&key=${settings.Oauth}`;
 }
 
